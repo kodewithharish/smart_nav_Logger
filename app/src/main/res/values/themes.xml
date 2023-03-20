@@ -21,5 +21,8 @@
 
     <style name="Theme.Smart_nav_Logger.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light"/>
+
+
     <style name="Theme.Smart_nav_Logger.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

@@ -4,4 +4,5 @@
     <string name="tab_text_2">Logging</string>
     <string name="stop">Stop</string>
     <string name="open">Open</string>
+    <string name="gps_switch">gps_switch</string>
 </resources>

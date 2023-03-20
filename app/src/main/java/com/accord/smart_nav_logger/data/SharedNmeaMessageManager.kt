@@ -28,12 +28,16 @@ class SharedNmeaMessageManager constructor(
 
 
 
-  /*  init {
-        val device = File(COMMPORT_MXC0)
-        val baurate = COMMPORT_MXC0_Baudrate.toInt()
-        val serialPort   = SerialPort(device, baurate)
-        fd=serialPort.inputStream
-    }*/
+    init {
+        try {
+            val device = File(COMMPORT_MXC0)
+            val baurate = COMMPORT_MXC0_Baudrate.toInt()
+            val serialPort   = SerialPort(device, baurate)
+            fd=serialPort.inputStream
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 
 
      @ExperimentalCoroutinesApi
@@ -49,11 +53,11 @@ class SharedNmeaMessageManager constructor(
 
                  while (running) {
 
-                    /* val length = fd.read(buffer)
+                     val length = fd.read(buffer)
 
                      val data = buffer.copyOf(length)
-*/
-                     trySend(buffer)
+
+                     trySend(data)
 
 
                  }

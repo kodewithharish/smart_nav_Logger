@@ -12,10 +12,15 @@ import androidx.viewpager.widget.ViewPager
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import androidx.core.view.MenuItemCompat
+import com.accord.smart_nav_logger.App.Companion.prefs
+import com.accord.smart_nav_logger.PreferenceUtils.isTrackingStarted
 import com.accord.smart_nav_logger.data.SharedHamsaMessageManager
 import com.accord.smart_nav_logger.ui.main.SectionsPagerAdapter
 import com.accord.smart_nav_logger.databinding.ActivityMainBinding
+import com.google.android.material.switchmaterial.SwitchMaterial
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -25,6 +30,7 @@ class MainActivity : AppCompatActivity() {
 
     private var isServiceBound = false
     private var service: MainService? = null
+    private var switch: SwitchMaterial? = null
 
     private var foregroundOnlyServiceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(componentName: ComponentName, iBinder: IBinder) {
@@ -50,12 +56,15 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.toolbar)
+
         val sectionsPagerAdapter = SectionsPagerAdapter(this, supportFragmentManager)
         val viewPager: ViewPager = binding.viewPager
         viewPager.adapter = sectionsPagerAdapter
         val tabs: TabLayout = binding.tabs
         tabs.setupWithViewPager(viewPager)
         val fab: FloatingActionButton = binding.fab
+
 
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
@@ -64,5 +73,53 @@ class MainActivity : AppCompatActivity() {
 
         val serviceIntent = Intent(this, MainService::class.java)
         bindService(serviceIntent, foregroundOnlyServiceConnection, BIND_AUTO_CREATE)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+
+        menuInflater.inflate(R.menu.main_menu, menu)
+
+        val item = menu?.findItem(R.id.gps_switch_item)
+        if (item != null) {
+            switch = MenuItemCompat.getActionView(item).findViewById(R.id.gps_switch)
+
+            // Initialize state of GPS switch before we set the listener, so we don't double-trigger start or stop
+            switch!!.isChecked = isTrackingStarted(prefs)
+
+            // Set up listener for GPS on/off switch
+            switch!!.setOnClickListener {
+                // Turn GPS on or off
+                if (!switch!!.isChecked && isTrackingStarted(prefs)) {
+                    service?.unsubscribeToLocationUpdates()
+                } else {
+                    if (switch!!.isChecked && !isTrackingStarted(prefs)) {
+                        service?.subscribeToLocationUpdates()
+                    }
+                }
+            }
+
+
+        }
+
+
+            return true
+
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle menu item selection
+        when (item.itemId) {
+            R.id.gps_switch -> {
+                return true
+            }
+            R.id.share -> {
+              //  share()
+                return true
+            }
+            R.id.filter_sats -> {
+               // UIUtils.showFilterDialog(this)
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 }

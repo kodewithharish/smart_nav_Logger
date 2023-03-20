@@ -163,6 +163,7 @@ class MainService:LifecycleService() {
 
     fun subscribeToLocationUpdates() {
         Log.d(TAG, "subscribeToLocationUpdates()")
+        PreferenceUtils.saveTrackingStarted(true, prefs)
 
         // Binding to this service doesn't actually trigger onStartCommand(). That is needed to
         // ensure this Service can be promoted to a foreground service, i.e., the service needs to
@@ -171,6 +172,9 @@ class MainService:LifecycleService() {
     }
 
     fun unsubscribeToLocationUpdates() {
+
+        PreferenceUtils.saveTrackingStarted(false, prefs)
+
         Log.d(TAG, "unsubscribeToLocationUpdates()")
 
         try {

@@ -25,13 +25,16 @@ open class SharedHamsaMessageManager constructor(
     lateinit var t1:Thread
 
 
-  /*  init {
-        val device = File(config.COMMPORT_MXC2)
-        val baurate = config.COMMPORT_MXC2_Baudrate.toInt()
-        val serialPort   = SerialPort(device, baurate)
-        fd=serialPort.inputStream
+    init {
+        try {
+            val device = File(config.COMMPORT_MXC2)
+            val baurate = config.COMMPORT_MXC2_Baudrate.toInt()
+            val serialPort   = SerialPort(device, baurate)
+            fd=serialPort.inputStream
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
-*/
     @ExperimentalCoroutinesApi
     @SuppressLint("MissingPermission")
     private val _HamsaUpdtaes = callbackFlow {
@@ -45,11 +48,11 @@ open class SharedHamsaMessageManager constructor(
 
                 while (running) {
 
-                  /*  val length = fd.read(buffer)
+                    val length = fd.read(buffer)
 
                     val data = buffer.copyOf(length)
-*/
-                    trySend(buffer)
+
+                    trySend(data)
 
 
                 }
