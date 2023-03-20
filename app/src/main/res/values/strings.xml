@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">smart_nav_Logger</string>
+    <string name="tab_text_1">Home</string>
+    <string name="tab_text_2">Logging</string>
+    <string name="stop">Stop</string>
+    <string name="open">Open</string>
+</resources>
