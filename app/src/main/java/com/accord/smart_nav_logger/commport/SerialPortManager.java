@@ -129,7 +129,7 @@ public class SerialPortManager {
 
     public void closeL5() {
         if (mReadThreadL5 != null) {
-            mReadThreadL5.t1.stop();
+            //mReadThreadL5.t1.stop();
         }
         if (mOutputStreamL5 != null) {
             try {

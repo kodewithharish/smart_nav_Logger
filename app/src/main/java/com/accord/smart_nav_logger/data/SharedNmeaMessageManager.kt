@@ -10,10 +10,12 @@ import com.accord.smart_nav_logger.data.config.Companion.COMMPORT_MXC0_Baudrate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.isActive
 import java.io.File
 import java.io.InputStream
 
@@ -28,43 +30,39 @@ class SharedNmeaMessageManager constructor(
 
 
 
-    init {
+  /*  init {
         try {
-            val device = File(COMMPORT_MXC0)
-            val baurate = COMMPORT_MXC0_Baudrate.toInt()
-            val serialPort   = SerialPort(device, baurate)
-            fd=serialPort.inputStream
+
         } catch (e: Exception) {
             e.printStackTrace()
         }
-    }
+    }*/
 
 
      @ExperimentalCoroutinesApi
      @SuppressLint("MissingPermission")
      private val _NmeaUpdtaes = callbackFlow {
 
-          t1 = Thread(){
 
-              var running = false
-
-             fun run() {
-                 running = true
-
-                 while (running) {
-
-                     val length = fd.read(buffer)
-
-                     val data = buffer.copyOf(length)
-
-                     trySend(data)
+         val device = File(COMMPORT_MXC0)
+         val baurate = COMMPORT_MXC0_Baudrate.toInt()
+         val serialPort   = SerialPort(device, baurate)
+         fd=serialPort.inputStream
 
 
-                 }
+         Log.d("Comport_read_Nmea",""+fd.read(buffer))
+
+         // Continuously read data from the port
+         while (isActive) {
+             val numBytes = fd.read(buffer)
+             if (numBytes > 0) {
+                 // Send the received bytes to the downstream collectors
+                 val data = buffer.copyOfRange(0, numBytes)
+                 trySend(data)
              }
+             delay(10)
+         }
 
-          }
-         t1.start()
 
 
 

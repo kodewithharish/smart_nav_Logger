@@ -1,6 +1,5 @@
 package com.accord.smart_nav_logger
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
@@ -8,13 +7,12 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.content.res.Configuration
-import android.location.Location
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
@@ -27,6 +25,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import java.nio.charset.StandardCharsets
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -42,7 +41,9 @@ class MainService:LifecycleService() {
 
 
     private var nmeaFlow: Job? = null
+    private var nmeanewFlow: Job? = null
     private var hamsaFlow: Job? = null
+    private var lcationFlow: Job? = null
 
     private val localBinder = LocalBinder()
 
@@ -97,7 +98,47 @@ class MainService:LifecycleService() {
     private fun observeFlows() {
 
         observeNmeaFlow()
+        observeNmeanewFlow()
         observeHamsaeFlow()
+        observeLocationFlow()
+
+    }
+
+    private fun observeLocationFlow() {
+        if(lcationFlow?.isActive==true)
+        {
+            return
+        }
+        lcationFlow=repository.getLocation().flowWithLifecycle(lifecycle,Lifecycle.State.STARTED).onEach {
+
+
+
+            GlobalScope.launch(Dispatchers.IO) {
+
+                Log.d(TAG, "Service NMEA: $it.")
+
+            }
+        }.launchIn(lifecycleScope)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun observeNmeanewFlow() {
+
+        if(nmeanewFlow?.isActive==true)
+        {
+            return
+        }
+        nmeanewFlow=repository.getNmeam().flowWithLifecycle(lifecycle,Lifecycle.State.STARTED).onEach {
+
+
+
+             GlobalScope.launch(Dispatchers.IO) {
+
+                 Log.d(TAG, "Service NMEA: $it")
+
+             }
+        }.launchIn(lifecycleScope)
 
     }
 
@@ -112,7 +153,8 @@ class MainService:LifecycleService() {
 
             GlobalScope.launch(Dispatchers.IO) {
 
-                Log.d(TAG, "Service NMEA: $it")
+                val message = String(it, StandardCharsets.ISO_8859_1)
+                Log.d(TAG, "Service NMEA_L5: $message")
 
             }
 
@@ -130,8 +172,9 @@ class MainService:LifecycleService() {
         nmeaFlow = repository.getNmea()
             .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
             .onEach {
-                Log.d(TAG, "Service NMEA: $it")
                 GlobalScope.launch(Dispatchers.IO) {
+                    val message = String(it, StandardCharsets.ISO_8859_1)
+                    Log.d(TAG, "Service NMEA_L1: $message")
 
 
                 }
@@ -199,6 +242,8 @@ class MainService:LifecycleService() {
     private fun cancelFlows() {
         hamsaFlow?.cancel()
         nmeaFlow?.cancel()
+        nmeanewFlow?.cancel()
+        lcationFlow?.cancel()
 
     }
 

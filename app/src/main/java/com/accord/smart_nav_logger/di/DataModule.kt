@@ -3,9 +3,7 @@ package com.accord.smart_nav_logger.di
 import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
-import com.accord.smart_nav_logger.data.SharedLoggingManager
-import com.accord.smart_nav_logger.data.SharedHamsaMessageManager
-import com.accord.smart_nav_logger.data.SharedNmeaMessageManager
+import com.accord.smart_nav_logger.data.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,6 +21,15 @@ object DataModule {
     @Singleton
     fun provideSharedPreferences(@ApplicationContext context: Context
     ): SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+
+
+    @Provides
+    @Singleton
+    fun provideSharedLocationManager(
+        @ApplicationContext context: Context,
+        prefs: SharedPreferences
+    ): SharedLocationManager =
+        SharedLocationManager(context, GlobalScope, prefs)
 
 
     @Provides
@@ -57,5 +64,12 @@ object DataModule {
     ): SharedHamsaMessageManager =
         SharedHamsaMessageManager(context,GlobalScope , prefs)
 
+    @Provides
+    @Singleton
+    fun provideSharedNmeaManager(
+        @ApplicationContext context: Context,
+        prefs: SharedPreferences,
+    ): SharedNmeaManager =
+        SharedNmeaManager(context, GlobalScope, prefs)
 
 }
