@@ -102,7 +102,7 @@ public class SerialPortManager {
 
     public void closeL1() {
         if (mReadThreadL1 != null) {
-            mReadThreadL1.t1.stop();
+           // mReadThreadL1.t1.stop();
         }
         if (mOutputStreamL1 != null) {
             try {

@@ -23,9 +23,9 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.util.Log
+import com.accord.smart_nav_logger.util.PermissionUtil
 import com.accord.smart_nav_logger.util.PreferenceUtil.minDistance
 import com.accord.smart_nav_logger.util.PreferenceUtil.minTimeMillis
-import com.accord.smart_nav_logger.util.hasPermission
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
@@ -59,8 +59,8 @@ class SharedLocationManager constructor(
             trySend(location)
         }
 
-        if (!context.hasPermission(Manifest.permission.ACCESS_FINE_LOCATION) ||
-            !context.hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+        if (!PermissionUtil.hasPermission(Manifest.permission.ACCESS_FINE_LOCATION) ||
+            !PermissionUtil.hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
         ) close()
 
         Log.d(TAG, "Starting location updates with minTime=${minTimeMillis(context, prefs)}ms and minDistance=${minDistance(context, prefs)}m")

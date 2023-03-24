@@ -21,6 +21,8 @@ import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.accord.smart_nav_logger.App.Companion.prefs
 import com.accord.smart_nav_logger.data.LoggingRepository
+import com.accord.smart_nav_logger.util.FIleLogger
+import com.accord.smart_nav_logger.util.NMEALoggingManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
@@ -47,13 +49,14 @@ class MainService:LifecycleService() {
 
     private val localBinder = LocalBinder()
 
+    lateinit var nmeaLoggingManager: NMEALoggingManager
 
     override fun onCreate() {
         super.onCreate()
 
         Log.d(TAG, "onCreate()")
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
+        nmeaLoggingManager= NMEALoggingManager()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -87,7 +90,7 @@ class MainService:LifecycleService() {
         }
                 // We may have been restarted by the system. Manage our lifetime accordingly.
                 createNotificationChannel()
-                startForeground(NOTIFICATION_ID, buildNotification())
+                startForeground(NOTIFICATION_ID, buildNotification(""))
 
         // Tells the system to recreate the service after it's been killed.
         return super.onStartCommand(intent, flags, START_NOT_STICKY)
@@ -114,7 +117,6 @@ class MainService:LifecycleService() {
 
 
             GlobalScope.launch(Dispatchers.IO) {
-
                 Log.d(TAG, "Service NMEA: $it.")
 
             }
@@ -131,17 +133,20 @@ class MainService:LifecycleService() {
         }
         nmeanewFlow=repository.getNmeam().flowWithLifecycle(lifecycle,Lifecycle.State.STARTED).onEach {
 
+            GlobalScope.launch(Dispatchers.IO) {
 
-
-             GlobalScope.launch(Dispatchers.IO) {
-
-                 Log.d(TAG, "Service NMEA: $it")
-
+                Log.d(TAG, "onNmea:$it")
+// Show location in notification
+                notificationManager.notify(
+                    NOTIFICATION_ID,
+                    buildNotification(it)
+                )
              }
         }.launchIn(lifecycleScope)
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @ExperimentalCoroutinesApi
     private fun observeHamsaeFlow() {
 
@@ -154,8 +159,14 @@ class MainService:LifecycleService() {
             GlobalScope.launch(Dispatchers.IO) {
 
                 val message = String(it, StandardCharsets.ISO_8859_1)
-                Log.d(TAG, "Service NMEA_L5: $message")
+                Log.d(TAG, "onNmea:$message")
 
+                FIleLogger.createRootDirectory()
+// Show location in notification
+                notificationManager.notify(
+                    NOTIFICATION_ID,
+                    buildNotification(message)
+                )
             }
 
         }.launchIn(lifecycleScope)
@@ -174,8 +185,13 @@ class MainService:LifecycleService() {
             .onEach {
                 GlobalScope.launch(Dispatchers.IO) {
                     val message = String(it, StandardCharsets.ISO_8859_1)
-                    Log.d(TAG, "Service NMEA_L1: $message")
+                    Log.d(TAG, "onNmea:$message")
 
+                    // Show location in notification
+                    notificationManager.notify(
+                        NOTIFICATION_ID,
+                        buildNotification(message)
+                    )
 
                 }
             }
@@ -207,6 +223,8 @@ class MainService:LifecycleService() {
     fun subscribeToLocationUpdates() {
         Log.d(TAG, "subscribeToLocationUpdates()")
         PreferenceUtils.saveTrackingStarted(true, prefs)
+
+
 
         // Binding to this service doesn't actually trigger onStartCommand(). That is needed to
         // ensure this Service can be promoted to a foreground service, i.e., the service needs to
@@ -274,9 +292,14 @@ class MainService:LifecycleService() {
     /*
     * Generates a BIG_TEXT_STYLE Notification that represent latest location.
     */
-    private fun buildNotification(): Notification {
+    private fun buildNotification(nmea:String): Notification {
         val titleText = "Smart_nav_Logger"
-        val summaryText = "Log Android Nmea Data"
+        val summaryText = "$nmea"
+
+
+        /*val titleText = satellites.toNotificationTitle(app)
+        val summaryText = location?.toNotificationSummary(app, prefs) ?: getString(R.string.no_location_text)
+*/
 
         // 2. Build the BIG_TEXT_STYLE.
         val bigTextStyle = NotificationCompat.BigTextStyle()

@@ -1,10 +1,14 @@
 package com.accord.smart_nav_logger
 
+import android.app.Activity
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.os.Bundle
 import android.os.IBinder
+import android.util.Log
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
@@ -12,16 +16,20 @@ import androidx.viewpager.widget.ViewPager
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import androidx.core.view.MenuItemCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.accord.smart_nav_logger.App.Companion.app
 import com.accord.smart_nav_logger.App.Companion.prefs
 import com.accord.smart_nav_logger.PreferenceUtils.isTrackingStarted
 import com.accord.smart_nav_logger.data.LoggingRepository
-import com.accord.smart_nav_logger.data.SharedHamsaMessageManager
 import com.accord.smart_nav_logger.ui.main.SectionsPagerAdapter
 import com.accord.smart_nav_logger.databinding.ActivityMainBinding
+import com.accord.smart_nav_logger.util.LibUtils
+import com.accord.smart_nav_logger.util.PermissionUtil
 import com.google.android.material.switchmaterial.SwitchMaterial
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -43,6 +51,7 @@ class MainActivity : AppCompatActivity() {
     private var switch: SwitchMaterial? = null
 
     private var locationFlow: Job? = null
+    private var userDeniedPermission = false
 
 
     private var foregroundOnlyServiceConnection: ServiceConnection = object : ServiceConnection {
@@ -53,6 +62,7 @@ class MainActivity : AppCompatActivity() {
             if (locationFlow?.isActive== true) {
                 // Activity started location updates but service wasn't bound yet - tell service to start now
                 service?.subscribeToLocationUpdates()
+
             }
         }
 
@@ -81,13 +91,37 @@ class MainActivity : AppCompatActivity() {
 
         observeLocationFlow()
 
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
+        if(PreferenceUtils.isLoggingStarted(prefs))
+        {
+            binding.fab.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+            PreferenceUtils.saveLoggingStarted(true,prefs)
+
+        }else{
+            binding.fab.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+            PreferenceUtils.saveLoggingStarted(false,prefs)
         }
 
-        val serviceIntent = Intent(this, MainService::class.java)
-        bindService(serviceIntent, foregroundOnlyServiceConnection, BIND_AUTO_CREATE)
+
+        fab.setOnClickListener { view ->
+
+          if(PreferenceUtils.isLoggingStarted(prefs))
+          {
+              binding.fab.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+              PreferenceUtils.saveLoggingStarted(false,prefs)
+              Snackbar.make(view, "Log Stopped", Snackbar.LENGTH_LONG)
+                  .setAction("Log Stopped", null).show()
+
+          }else{
+              binding.fab.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+              PreferenceUtils.saveLoggingStarted(true,prefs)
+              Snackbar.make(view, "Log Started", Snackbar.LENGTH_LONG)
+                  .setAction("Log Started", null).show()
+          }
+
+        }
+
+        requestPermissionAndInit(this)
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -160,6 +194,65 @@ class MainActivity : AppCompatActivity() {
               //  benchmarkController?.onLocationChanged(it)
             }
             .launchIn(lifecycleScope)
+    }
+
+
+    private fun requestPermissionAndInit(activity: Activity) {
+        if (PermissionUtil.hasGrantedPermissions(activity, PermissionUtil.REQUIRED_PERMISSIONS)) {
+
+            init()
+
+        } else {
+            // Request permissions from the user
+            ActivityCompat.requestPermissions(
+                activity,
+                PermissionUtil.REQUIRED_PERMISSIONS,
+                PermissionUtil.LOCATION_PERMISSION_REQUEST
+            )
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<String>, grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == PermissionUtil.LOCATION_PERMISSION_REQUEST) {
+            if (!grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                userDeniedPermission = false
+
+
+            } else if (!grantResults.isNotEmpty() && grantResults[1] == PackageManager.PERMISSION_GRANTED){
+                userDeniedPermission = false
+            }else{
+
+                init()
+
+            }
+        }
+    }
+
+
+
+    fun init()
+    {
+        val serviceIntent = Intent(this, MainService::class.java)
+        bindService(serviceIntent, foregroundOnlyServiceConnection, BIND_AUTO_CREATE)
+
+        if(switch!=null)
+        switch!!.isChecked = isTrackingStarted(prefs)
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (!userDeniedPermission) {
+            requestPermissionAndInit(this)
+        } else {
+            // Explain permission to user (don't request permission here directly to avoid infinite
+            // loop if user selects "Don't ask again") in system permission prompt
+            LibUtils.showLocationPermissionDialog(this)
+        }
+
     }
 
 }

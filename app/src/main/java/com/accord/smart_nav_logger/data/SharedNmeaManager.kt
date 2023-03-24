@@ -29,7 +29,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import com.accord.smart_nav_logger.PreferenceUtils
 import com.accord.smart_nav_logger.R
-import com.accord.smart_nav_logger.util.hasPermission
+import com.accord.smart_nav_logger.util.PermissionUtil
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -69,8 +69,9 @@ open class SharedNmeaManager constructor(
         }
 
 
-        if (!context.hasPermission(Manifest.permission.ACCESS_FINE_LOCATION) ||
-            !context.hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+
+        if (!PermissionUtil.hasPermission(Manifest.permission.ACCESS_FINE_LOCATION) ||
+            !PermissionUtil.hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
         ) close()
 
         Log.d(TAG, "Starting NMEA updates")
