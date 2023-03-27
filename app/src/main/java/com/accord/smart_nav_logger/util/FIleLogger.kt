@@ -3,7 +3,7 @@ package com.accord.smart_nav_logger.util
 import java.io.File
 
 object FIleLogger {
-    private const val _ROOT_FOLDER_NAME_ = "smartNav20"
+    private const val _ROOT_FOLDER_NAME_ = "smartNavLogger20"
     private const val _ROOT_SYS = "/sdcard"
     var _SMART_NAV_ROOT = File(_ROOT_SYS + File.separator + _ROOT_FOLDER_NAME_)
     var _SMART_NAV_ROOT_MAPS =
@@ -13,6 +13,21 @@ object FIleLogger {
 
     //to log NMEA data
     var _SMART_NAV_NMEA_LOG = File(_SMART_NAV_ROOT, File.separator + "nmea" + File.separator)
+
+
+    fun createRootDirectory()
+    {
+        if (!_SMART_NAV_ROOT.exists()) {
+            _SMART_NAV_ROOT.mkdir()
+        }
+
+        if (!_SMART_NAV_NMEA_LOG.exists()) {
+            _SMART_NAV_NMEA_LOG.mkdir()
+        }
+    }
+
+
+
 
 
 

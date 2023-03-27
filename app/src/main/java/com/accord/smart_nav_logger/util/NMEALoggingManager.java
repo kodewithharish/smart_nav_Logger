@@ -35,7 +35,7 @@ public class NMEALoggingManager {
     private static final File currentFile = new File(_SMART_NAV_NMEA_LOG, current);
     private static final int MAX_CACHE_SECONDS = 1024;
     private static final int CACHE_LINES_PER_SEC = 4;
-    private static final double MAX_FILE_SIZE_MB = 250 * 1024 * 1024; // = 500 Mega bytes to store 100 hours of data
+    private static final double MAX_FILE_SIZE_MB = 100 * 1024 * 1024 ; // = 500 Mega bytes to store 100 hours of data
 
     private static final String TAG = NMEALoggingManager.class.getSimpleName();
     private static final boolean ZIP_AND_STORE = true;
@@ -69,17 +69,12 @@ public class NMEALoggingManager {
         return false;
     }
 
-    public  void logNmea(String nmea) {
-/*
+    public synchronized void logNmea(String nmea) {
 
         if (nmeaStringBuilder.length() < MAX_CACHE_SECONDS * CACHE_LINES_PER_SEC) {
             nmeaStringBuilder.append(nmea);
             return;
         }
-*/
-
-        Log.d("NmeaLogging", "" + nmeaStringBuilder.toString());
-
         nmeaStringBuilder.append(nmea);
         log(nmeaStringBuilder.toString());
         nmeaStringBuilder.setLength(0);
@@ -203,6 +198,7 @@ public class NMEALoggingManager {
                 if (currentFile.length() > MAX_FILE_SIZE_MB) {
                     //       Log.i("Nmea file", "separated");
                     stopLogging();
+                    renameNmea();
                     createTempNmeaFile();
                     startLogging();
                 }
@@ -266,10 +262,20 @@ public class NMEALoggingManager {
     public void startLogging() {
 
         //stopLogging();
-       // saveTempFileAsNmea();
+
+        renameNmea();
         createTempNmeaFile();
         firstTimeLog = true;
         valuate = 0;
+    }
+
+    private void renameNmea() {
+
+        File renamedFile = new File(_SMART_NAV_NMEA_LOG, System.currentTimeMillis() / 1000 + EXTENSION);
+        if (currentFile.exists() && currentFile.length() > 0) {
+            boolean renamed = currentFile.renameTo(renamedFile);
+
+        }
     }
 
     public boolean stopLogging() {

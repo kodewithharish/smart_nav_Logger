@@ -96,7 +96,7 @@ class LiveFragment : Fragment() {
         nmeaFlow = repository.getNmea()
             .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
             .onEach {
-                GlobalScope.launch(Dispatchers.Main) {
+                GlobalScope.launch(Dispatchers.Unconfined) {
                     val message = String(it, StandardCharsets.ISO_8859_1)
                     //_binding?.logView?.text = message
 

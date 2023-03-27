@@ -34,10 +34,10 @@ class LoggingFragmnet() :Fragment() {
         _binding = FragmentLoggingBinding.inflate(inflater, container, false)
         val root = binding.root
 
-        val textView: TextView = binding.sectionLabel
+       /* val textView: TextView = binding.sectionLabel
         loggingViewModel.text.observe(viewLifecycleOwner, Observer {
             textView.text = it
-        })
+        })*/
         return root
 
     }

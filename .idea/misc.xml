@@ -3,11 +3,13 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Kodewithharish_/smart_nav_Logger/app/src/main/res/drawable/ic_baseline_add_24.xml" value="0.123" />
         <entry key="..\:/Kodewithharish_/smart_nav_Logger/app/src/main/res/drawable/ic_baseline_cancel_24.xml" value="0.1" />
         <entry key="..\:/Kodewithharish_/smart_nav_Logger/app/src/main/res/drawable/ic_baseline_filter_list_24.xml" value="0.116" />
         <entry key="..\:/Kodewithharish_/smart_nav_Logger/app/src/main/res/drawable/ic_baseline_launch_24.xml" value="0.1" />
         <entry key="..\:/Kodewithharish_/smart_nav_Logger/app/src/main/res/drawable/ic_baseline_pause_circle_outline_24.xml" value="0.1" />
         <entry key="..\:/Kodewithharish_/smart_nav_Logger/app/src/main/res/drawable/ic_baseline_play_circle_outline_24.xml" value="0.1" />
+        <entry key="..\:/Kodewithharish_/smart_nav_Logger/app/src/main/res/drawable/ic_baseline_settings_24.xml" value="0.1" />
         <entry key="..\:/Kodewithharish_/smart_nav_Logger/app/src/main/res/drawable/ic_sat_notification.xml" value="0.1" />
         <entry key="..\:/Kodewithharish_/smart_nav_Logger/app/src/main/res/drawable/social_share.xml" value="0.116" />
         <entry key="..\:/Kodewithharish_/smart_nav_Logger/app/src/main/res/layout/activity_main.xml" value="0.20416666666666666" />
@@ -15,6 +17,7 @@
         <entry key="..\:/Kodewithharish_/smart_nav_Logger/app/src/main/res/layout/fragment_main.xml" value="0.20416666666666666" />
         <entry key="..\:/Kodewithharish_/smart_nav_Logger/app/src/main/res/layout/gps_switch.xml" value="0.203125" />
         <entry key="..\:/Kodewithharish_/smart_nav_Logger/app/src/main/res/menu/main_menu.xml" value="0.203125" />
+        <entry key="..\:/Kodewithharish_/smart_nav_Logger/app/src/main/res/xml/file_providers_paths.xml" value="0.203125" />
       </map>
     </option>
   </component>

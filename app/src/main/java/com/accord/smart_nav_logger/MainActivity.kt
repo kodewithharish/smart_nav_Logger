@@ -28,6 +28,7 @@ import com.accord.smart_nav_logger.PreferenceUtils.isTrackingStarted
 import com.accord.smart_nav_logger.data.LoggingRepository
 import com.accord.smart_nav_logger.ui.main.SectionsPagerAdapter
 import com.accord.smart_nav_logger.databinding.ActivityMainBinding
+import com.accord.smart_nav_logger.util.FIleLogger.createRootDirectory
 import com.accord.smart_nav_logger.util.LibUtils
 import com.accord.smart_nav_logger.util.PermissionUtil
 import com.google.android.material.switchmaterial.SwitchMaterial
@@ -49,6 +50,7 @@ class MainActivity : AppCompatActivity() {
     private var isServiceBound = false
     private var service: MainService? = null
     private var switch: SwitchMaterial? = null
+    private var settings: SwitchMaterial? = null
 
     private var locationFlow: Job? = null
     private var userDeniedPermission = false
@@ -131,6 +133,7 @@ class MainActivity : AppCompatActivity() {
         val item = menu?.findItem(R.id.gps_switch_item)
         if (item != null) {
             switch = MenuItemCompat.getActionView(item).findViewById(R.id.gps_switch)
+            settings = MenuItemCompat.getActionView(item).findViewById(R.id.settings)
 
             // Initialize state of GPS switch before we set the listener, so we don't double-trigger start or stop
             switch!!.isChecked = isTrackingStarted(prefs)
@@ -148,6 +151,14 @@ class MainActivity : AppCompatActivity() {
             }
 
 
+
+           /* settings!!.setOnClickListener{
+
+
+
+            }*/
+
+
         }
 
 
@@ -161,11 +172,11 @@ class MainActivity : AppCompatActivity() {
             R.id.gps_switch -> {
                 return true
             }
-            R.id.share -> {
+            R.id.settings -> {
               //  share()
                 return true
             }
-            R.id.filter_sats -> {
+            R.id.create_new_log -> {
                // UIUtils.showFilterDialog(this)
             }
         }
@@ -240,6 +251,8 @@ class MainActivity : AppCompatActivity() {
 
         if(switch!=null)
         switch!!.isChecked = isTrackingStarted(prefs)
+
+        createRootDirectory()
 
     }
 

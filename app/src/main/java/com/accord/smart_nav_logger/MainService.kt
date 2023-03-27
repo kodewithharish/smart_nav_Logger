@@ -19,6 +19,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.accord.smart_nav_logger.App.Companion.app
 import com.accord.smart_nav_logger.App.Companion.prefs
 import com.accord.smart_nav_logger.data.LoggingRepository
 import com.accord.smart_nav_logger.util.FIleLogger
@@ -161,11 +162,18 @@ class MainService:LifecycleService() {
                 val message = String(it, StandardCharsets.ISO_8859_1)
                 Log.d(TAG, "onNmea:$message")
 
-                FIleLogger.createRootDirectory()
-// Show location in notification
+              //  FIleLogger.createRootDirectory()
+             // Show location in notification
+                if(PreferenceUtils.isLoggingStarted(prefs))
+                {
+                    nmeaLoggingManager.logNmea(message)
+
+                }
+
+
                 notificationManager.notify(
                     NOTIFICATION_ID,
-                    buildNotification(message)
+                    buildNotification((message.length).toString()+message)
                 )
             }
 
@@ -186,11 +194,16 @@ class MainService:LifecycleService() {
                 GlobalScope.launch(Dispatchers.IO) {
                     val message = String(it, StandardCharsets.ISO_8859_1)
                     Log.d(TAG, "onNmea:$message")
+                    if(PreferenceUtils.isLoggingStarted(prefs))
+                    {
+                        nmeaLoggingManager.logNmea(message)
+
+                    }
 
                     // Show location in notification
                     notificationManager.notify(
                         NOTIFICATION_ID,
-                        buildNotification(message)
+                        buildNotification((message.length).toString()+message)
                     )
 
                 }
